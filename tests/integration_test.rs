@@ -158,7 +158,7 @@ async fn remote_decoder() {
         .config(
             RemoteJwksDecoderConfig::builder()
                 .cache_duration(Duration::milliseconds(100).to_std().unwrap()) // Short duration for testing
-                .retry_count(1) // Minimal retries for faster tests
+                .retry_count(1_usize) // Minimal retries for faster tests
                 .backoff(Duration::milliseconds(50).to_std().unwrap()) // Short backoff for testing
                 .build()
                 .unwrap(),
@@ -261,7 +261,7 @@ async fn test_remote_decoder_initialization() {
         .config(
             RemoteJwksDecoderConfig::builder()
                 .cache_duration(Duration::seconds(5).to_std().unwrap())
-                .retry_count(1)
+                .retry_count(1_usize)
                 .build()
                 .unwrap(),
         )
