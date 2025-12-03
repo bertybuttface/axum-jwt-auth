@@ -116,28 +116,38 @@ async fn header_auth(user: Claims<MyClaims, HeaderTokenExtractor<XAuthToken>>) {
 async fn cookie_auth(user: Claims<MyClaims, CookieTokenExtractor<AuthCookie>>) { }
 ```
 
-## TLS Backend Configuration
+## TLS and Crypto Backend Configuration
 
-By default, `axum-jwt-auth` uses `rustls-tls` with the `ring` crypto backend for compatibility. You can configure a different TLS backend via Cargo features:
+By default, `axum-jwt-auth` uses `rustls-tls` with the `rust_crypto` backend for compatibility. You can configure different backends via Cargo features:
 
 ```toml
-# Default: uses ring crypto backend
+# Default: uses rust_crypto for JWT, ring for TLS
 axum-jwt-auth = "0.6"
 
-# Recommended for new projects: uses aws-lc-rs (faster, no dual compilation)
+# Recommended for new projects: uses aws-lc-rs for both JWT and TLS (faster, no dual compilation)
 axum-jwt-auth = { version = "0.6", default-features = false, features = ["rustls-tls-aws-lc-rs"] }
 
-# Explicitly use ring backend
+# Explicitly use ring backend for both JWT and TLS
 axum-jwt-auth = { version = "0.6", default-features = false, features = ["rustls-tls-ring"] }
 
-# Use platform-native TLS
+# Use platform-native TLS with rust_crypto for JWT
 axum-jwt-auth = { version = "0.6", default-features = false, features = ["native-tls"] }
 ```
 
 **Why choose `rustls-tls-aws-lc-rs`?**
-- Avoids compiling both `ring` and `aws-lc-rs` (reduces build time by ~1-2 minutes)
+- Uses `aws-lc-rs` for both JWT validation (via jsonwebtoken) and TLS (via reqwest/rustls)
+- Avoids compiling multiple crypto backends (reduces build time by ~1-2 minutes)
 - Better compatibility with other crates that use `aws-lc-rs` as default
 - Recommended by the Rustls project for new applications
+
+**Feature matrix:**
+
+| Feature | JWT Crypto | TLS Backend | Use Case |
+|---------|-----------|-------------|----------|
+| `rustls-tls` (default) | `rust_crypto` | `ring` | Maximum compatibility |
+| `rustls-tls-aws-lc-rs` | `aws-lc-rs` | `aws-lc-rs` | Recommended for new projects |
+| `rustls-tls-ring` | `ring` | `ring` | Explicit ring usage |
+| `native-tls` | `rust_crypto` | platform | Use OS TLS stack |
 
 ## Examples
 
