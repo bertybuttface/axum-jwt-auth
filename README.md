@@ -116,6 +116,29 @@ async fn header_auth(user: Claims<MyClaims, HeaderTokenExtractor<XAuthToken>>) {
 async fn cookie_auth(user: Claims<MyClaims, CookieTokenExtractor<AuthCookie>>) { }
 ```
 
+## TLS Backend Configuration
+
+By default, `axum-jwt-auth` uses `rustls-tls` with the `ring` crypto backend for compatibility. You can configure a different TLS backend via Cargo features:
+
+```toml
+# Default: uses ring crypto backend
+axum-jwt-auth = "0.6"
+
+# Recommended for new projects: uses aws-lc-rs (faster, no dual compilation)
+axum-jwt-auth = { version = "0.6", default-features = false, features = ["rustls-tls-aws-lc-rs"] }
+
+# Explicitly use ring backend
+axum-jwt-auth = { version = "0.6", default-features = false, features = ["rustls-tls-ring"] }
+
+# Use platform-native TLS
+axum-jwt-auth = { version = "0.6", default-features = false, features = ["native-tls"] }
+```
+
+**Why choose `rustls-tls-aws-lc-rs`?**
+- Avoids compiling both `ring` and `aws-lc-rs` (reduces build time by ~1-2 minutes)
+- Better compatibility with other crates that use `aws-lc-rs` as default
+- Recommended by the Rustls project for new applications
+
 ## Examples
 
 See the [examples](./examples/) directory for complete working examples:
